@@ -1,34 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Inked
 
-## Getting Started
+A searchable directory of tattoo artists in Dallas and Austin — who they are,
+where they work, and what they do. Browse by map: the viewport is the query.
 
-First, run the development server:
+Next.js (App Router) · Tailwind · shadcn/ui · Redux Toolkit · Prisma · Neon
+Postgres · MapLibre with OpenFreeMap tiles.
+
+## Local setup
 
 ```bash
+npm install                 # postinstall runs `prisma generate`
+cp .env.example .env        # fill in both Neon connection strings
+npx prisma migrate dev      # create the schema
+npx prisma db seed          # load placeholder Dallas/Austin data
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env` needs two URLs from the Neon dashboard, and they are not
+interchangeable:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Which Neon URL | Used by |
+|---|---|---|
+| `DATABASE_URL` | pooled — host contains `-pooler` | the app at runtime |
+| `DIRECT_URL` | direct — no `-pooler` | Prisma CLI, migrations |
 
-## Learn More
+Migrations run DDL, which fails through Neon's connection pooler. The app wants
+the pooler, because serverless functions open many short-lived connections.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploying
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Vercel auto-detects Next.js. Set **both** environment variables above for
+Production, Preview, and Development before the first build — `src/lib/db.ts`
+throws at module load if `DATABASE_URL` is missing, so a build without them
+fails rather than degrading.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`npm run build` runs `prisma migrate deploy` first, so pushing a migration
+applies it to the database as part of the deploy.
 
-## Deploy on Vercel
+## Layout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+prisma/            schema, migrations, seed
+src/app/           routes; api/shops is the bounding-box query
+src/components/    Directory, MapView, ShopList, common (shadcn)
+src/lib/store/     Redux Toolkit — ui slice + RTK Query
+src/lib/db.ts      PrismaClient + Neon driver adapter
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Data
+
+Everything currently in the database is invented placeholder data at
+real-ish coordinates. Nothing is scraped, and no row describes a real business
+or person. See `Tattoo-Directory-Spec.md` for the sourcing rules the real
+dataset has to follow.
