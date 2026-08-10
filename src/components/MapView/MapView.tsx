@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { Map as MapLibreMap } from 'maplibre-gl'
-import type { Bounds, ShopWithArtists } from '@/lib/types'
+import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl'
+import type { ShopWithArtists } from '@/lib/types'
+import { selectShop, setBounds, useAppDispatch, useAppSelector } from '@/lib/store'
+import type { MapViewProps } from './MapView.types'
 
 /** Keyless vector tiles. See https://openfreemap.org */
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron'
@@ -12,14 +14,10 @@ const INITIAL_CENTER: [number, number] = [-97.2, 31.5]
 const INITIAL_ZOOM = 6.2
 
 /** Pan/zoom fires continuously; only query after the user settles. */
-const VIEWPORT_DEBOUNCE_MS = 300
+const DEBOUNCE_MS = 300
 
-interface MapViewProps {
-  shops: ShopWithArtists[]
-  onBoundsChange: (bounds: Bounds) => void
-  onSelectShop: (slug: string | null) => void
-  selectedSlug: string | null
-}
+const PIN = '#18181b'
+const PIN_SELECTED = '#7c3aed'
 
 function toGeoJSON(shops: ShopWithArtists[]) {
   return {
@@ -27,64 +25,64 @@ function toGeoJSON(shops: ShopWithArtists[]) {
     features: shops.map((shop) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [shop.lng, shop.lat] },
-      properties: {
-        slug: shop.slug,
-        name: shop.name,
-        artistCount: shop.artists.length,
-      },
+      properties: { slug: shop.slug, name: shop.name },
     })),
   }
 }
 
-export function MapView({
-  shops,
-  onBoundsChange,
-  onSelectShop,
-  selectedSlug,
-}: MapViewProps) {
+export function MapView({ shops }: MapViewProps) {
+  const dispatch = useAppDispatch()
+  const selectedSlug = useAppSelector((state) => state.ui.selectedSlug)
+
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
 
-  // Keep the latest callbacks reachable without re-running map setup.
-  const onBoundsChangeRef = useRef(onBoundsChange)
-  const onSelectShopRef = useRef(onSelectShop)
-  useEffect(() => {
-    onBoundsChangeRef.current = onBoundsChange
-    onSelectShopRef.current = onSelectShop
-  }, [onBoundsChange, onSelectShop])
+  // `isStyleLoaded()` stays false until every source has loaded, so it cannot
+  // gate setData. Track readiness here, and keep the latest shops reachable
+  // from setup, which runs once and cannot close over a changing prop.
+  const readyRef = useRef(false)
+  const shopsRef = useRef(shops)
 
-  // Set up once. maplibre-gl touches `window` at import time, so it is loaded
-  // dynamically here rather than at module scope — this file renders on the
-  // server too, even as a Client Component.
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    let map: MapLibreMap | null = null
+    let created: MapLibreMap | null = null
     let debounce: ReturnType<typeof setTimeout> | undefined
+    let observer: ResizeObserver | undefined
     let cancelled = false
 
     void (async () => {
-      const maplibregl = (await import('maplibre-gl')).default
+      // maplibre-gl touches `window` at import time, so it cannot be imported
+      // at module scope: this file is still evaluated during a server render.
+      const maplibregl = await import('maplibre-gl')
       if (cancelled) return
 
-      map = new maplibregl.Map({
+      const map = new maplibregl.Map({
         container,
         style: STYLE_URL,
         center: INITIAL_CENTER,
         zoom: INITIAL_ZOOM,
         attributionControl: { compact: true },
       })
+      created = map
       mapRef.current = map
 
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
 
-      map.on('load', () => {
-        if (!map) return
+      // The container can still be 0-height here (CSS not yet applied), which
+      // leaves the canvas unsized and stops MapLibre requesting any tiles.
+      observer = new ResizeObserver(() => {
+        map.resize()
+      })
+      observer.observe(container)
 
+      // 'style.load', not 'load': 'load' waits for a first visually complete
+      // render, which never arrives if the canvas started unsized.
+      map.on('style.load', () => {
         map.addSource('shops', {
           type: 'geojson',
-          data: toGeoJSON([]),
+          data: toGeoJSON(shopsRef.current),
           cluster: true,
           clusterRadius: 50,
           clusterMaxZoom: 13,
@@ -96,7 +94,7 @@ export function MapView({
           source: 'shops',
           filter: ['has', 'point_count'],
           paint: {
-            'circle-color': '#18181b',
+            'circle-color': PIN,
             'circle-radius': ['step', ['get', 'point_count'], 16, 5, 22, 15, 28],
             'circle-stroke-width': 2,
             'circle-stroke-color': '#ffffff',
@@ -108,10 +106,7 @@ export function MapView({
           type: 'symbol',
           source: 'shops',
           filter: ['has', 'point_count'],
-          layout: {
-            'text-field': ['get', 'point_count_abbreviated'],
-            'text-size': 12,
-          },
+          layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 12 },
           paint: { 'text-color': '#ffffff' },
         })
 
@@ -121,70 +116,62 @@ export function MapView({
           source: 'shops',
           filter: ['!', ['has', 'point_count']],
           paint: {
-            'circle-color': '#18181b',
+            'circle-color': PIN,
             'circle-radius': 8,
             'circle-stroke-width': 2,
             'circle-stroke-color': '#ffffff',
           },
         })
 
+        readyRef.current = true
+
         const emitBounds = () => {
-          if (!map) return
           const b = map.getBounds()
-          onBoundsChangeRef.current([
-            b.getSouth(),
-            b.getWest(),
-            b.getNorth(),
-            b.getEast(),
-          ])
+          dispatch(setBounds([b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]))
         }
 
         emitBounds()
 
         map.on('moveend', () => {
           clearTimeout(debounce)
-          debounce = setTimeout(emitBounds, VIEWPORT_DEBOUNCE_MS)
+          debounce = setTimeout(emitBounds, DEBOUNCE_MS)
         })
 
-        // Clicking a cluster zooms into it rather than selecting anything.
+        // A cluster zooms in rather than selecting anything.
         map.on('click', 'clusters', (event) => {
-          if (!map) return
           const feature = event.features?.[0]
-          const clusterId: unknown = feature?.properties?.['cluster_id']
+          const clusterId: unknown = feature?.properties['cluster_id']
           if (typeof clusterId !== 'number') return
 
-          const source = map.getSource('shops')
-          if (!source || source.type !== 'geojson') return
-
-          void source.getClusterExpansionZoom(clusterId).then((zoom) => {
-            if (!map || feature?.geometry.type !== 'Point') return
-            map.easeTo({
-              center: feature.geometry.coordinates as [number, number],
-              zoom,
+          void map
+            .getSource<GeoJSONSource>('shops')
+            ?.getClusterExpansionZoom(clusterId)
+            .then((zoom) => {
+              if (feature?.geometry.type !== 'Point') return
+              const [lng, lat] = feature.geometry.coordinates
+              if (lng === undefined || lat === undefined) return
+              map.easeTo({ center: [lng, lat], zoom })
             })
-          })
         })
 
         map.on('click', 'shop-pins', (event) => {
-          const slug: unknown = event.features?.[0]?.properties?.['slug']
-          if (typeof slug === 'string') onSelectShopRef.current(slug)
+          const slug: unknown = event.features?.[0]?.properties['slug']
+          if (typeof slug === 'string') dispatch(selectShop(slug))
         })
 
-        // Clicking bare map clears the selection.
         map.on('click', (event) => {
-          if (!map) return
           const hits = map.queryRenderedFeatures(event.point, {
             layers: ['clusters', 'shop-pins'],
           })
-          if (hits.length === 0) onSelectShopRef.current(null)
+          if (hits.length === 0) dispatch(selectShop(null))
         })
 
         for (const layer of ['clusters', 'shop-pins']) {
           map.on('mouseenter', layer, () => {
-            if (map) map.getCanvas().style.cursor = 'pointer'
+            map.getCanvas().style.cursor = 'pointer'
           })
           map.on('mouseleave', layer, () => {
-            if (map) map.getCanvas().style.cursor = ''
+            map.getCanvas().style.cursor = ''
           })
         }
       })
@@ -192,27 +179,22 @@ export function MapView({
 
     return () => {
       cancelled = true
+      readyRef.current = false
       clearTimeout(debounce)
-      map?.remove()
+      observer?.disconnect()
+      created?.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [dispatch])
 
-  // Push shop changes into the existing source instead of rebuilding the map.
+  // Push new results into the existing source instead of rebuilding the map.
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
+    shopsRef.current = shops
+    if (!readyRef.current) return
 
-    const apply = () => {
-      const source = map.getSource('shops')
-      if (source && source.type === 'geojson') source.setData(toGeoJSON(shops))
-    }
-
-    if (map.isStyleLoaded()) apply()
-    else map.once('load', apply)
+    mapRef.current?.getSource<GeoJSONSource>('shops')?.setData(toGeoJSON(shops))
   }, [shops])
 
-  // Highlight whichever pin the list has selected.
   useEffect(() => {
     const map = mapRef.current
     if (!map?.getLayer('shop-pins')) return
@@ -220,8 +202,8 @@ export function MapView({
     map.setPaintProperty('shop-pins', 'circle-color', [
       'case',
       ['==', ['get', 'slug'], selectedSlug ?? ''],
-      '#7c3aed',
-      '#18181b',
+      PIN_SELECTED,
+      PIN,
     ])
   }, [selectedSlug])
 

@@ -1,4 +1,4 @@
-import { Directory } from '@/components/directory'
+import { Directory } from '@/components/Directory'
 
 export default function Home() {
   return <Directory />
