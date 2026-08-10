@@ -1,0 +1,92 @@
+// Data model per Tattoo-Directory-Spec.md.
+// Scope note: `users` and `claims` are deliberately absent — the claim flow is
+// step 6 of the spec's sequence and needs Auth.js. `artists.claimed_by` arrives
+// with them.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum City {
+  dallas
+  austin
+}
+
+model Shop {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  address   String
+  city      City
+  lat       Float
+  lng       Float
+  website   String?
+  phone     String?
+  instagram String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  artists ArtistShop[]
+
+  // Serves the bounding-box query behind GET /api/shops?bounds=
+  @@index([lat, lng])
+  @@map("shops")
+}
+
+model Artist {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String
+  slug             String   @unique
+  instagram        String?
+  bio              String?
+  acceptingClients Boolean  @default(false) @map("accepting_clients")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  shops  ArtistShop[]
+  styles ArtistStyle[]
+
+  // (name, id) — names are not unique, so cursor pagination needs the id as a
+  // tiebreaker or rows at a page boundary get skipped.
+  @@index([name, id])
+  @@map("artists")
+}
+
+// Explicit join: artists move between shops and guest-spot, so the edge itself
+// carries data. A shopId column on Artist would have been wrong within a month.
+model ArtistShop {
+  artistId  String  @map("artist_id") @db.Uuid
+  shopId    String  @map("shop_id") @db.Uuid
+  isPrimary Boolean @default(false) @map("is_primary")
+  isGuest   Boolean @default(false) @map("is_guest")
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@id([artistId, shopId])
+  @@map("artist_shops")
+}
+
+model Style {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+  slug String @unique
+
+  artists ArtistStyle[]
+
+  @@map("styles")
+}
+
+model ArtistStyle {
+  artistId String @map("artist_id") @db.Uuid
+  styleId  String @map("style_id") @db.Uuid
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  style  Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+
+  @@id([artistId, styleId])
+  @@map("artist_styles")
+}
