@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { Map as MapLibreMap } from 'maplibre-gl'
+import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl'
 import type { Bounds, ShopWithArtists } from '@/lib/types'
 
 /** Keyless vector tiles. See https://openfreemap.org */
@@ -45,6 +45,13 @@ export function MapView({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
 
+  // `isStyleLoaded()` stays false until every source has loaded, so it cannot
+  // be used to decide whether the shops source is ready to accept data. Track
+  // readiness ourselves, and keep the latest shops reachable from map setup.
+  const styleReadyRef = useRef(false)
+  const shopsRef = useRef(shops)
+  shopsRef.current = shops
+
   // Keep the latest callbacks reachable without re-running map setup.
   const onBoundsChangeRef = useRef(onBoundsChange)
   const onSelectShopRef = useRef(onSelectShop)
@@ -54,37 +61,52 @@ export function MapView({
   }, [onBoundsChange, onSelectShop])
 
   // Set up once. maplibre-gl touches `window` at import time, so it is loaded
-  // dynamically here rather than at module scope — this file renders on the
-  // server too, even as a Client Component.
+  // dynamically here rather than at module scope — this file is still rendered
+  // on the server, even as a Client Component.
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    let map: MapLibreMap | null = null
+    let created: MapLibreMap | null = null
     let debounce: ReturnType<typeof setTimeout> | undefined
+    let resizeObserver: ResizeObserver | undefined
     let cancelled = false
 
     void (async () => {
-      const maplibregl = (await import('maplibre-gl')).default
+      const maplibregl = await import('maplibre-gl')
       if (cancelled) return
 
-      map = new maplibregl.Map({
+      const map = new maplibregl.Map({
         container,
         style: STYLE_URL,
         center: INITIAL_CENTER,
         zoom: INITIAL_ZOOM,
         attributionControl: { compact: true },
       })
+      created = map
       mapRef.current = map
+      // TEMP DEBUG
+      ;(window as unknown as { __map: MapLibreMap }).__map = map
 
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        'top-right',
+      )
 
-      map.on('load', () => {
-        if (!map) return
+      // The container can still be 0-height when this runs (CSS not yet
+      // applied), which leaves the canvas unsized and stops MapLibre from
+      // requesting any tiles. Re-measure whenever the box changes.
+      resizeObserver = new ResizeObserver(() => {
+        map.resize()
+      })
+      resizeObserver.observe(container)
 
+      // 'style.load' rather than 'load': 'load' waits for a first visually
+      // complete render, which never arrives if the canvas starts unsized.
+      map.on('style.load', () => {
         map.addSource('shops', {
           type: 'geojson',
-          data: toGeoJSON([]),
+          data: toGeoJSON(shopsRef.current),
           cluster: true,
           clusterRadius: 50,
           clusterMaxZoom: 13,
@@ -128,8 +150,10 @@ export function MapView({
           },
         })
 
+        // Layers exist and the source will accept data from here on.
+        styleReadyRef.current = true
+
         const emitBounds = () => {
-          if (!map) return
           const b = map.getBounds()
           onBoundsChangeRef.current([
             b.getSouth(),
@@ -148,31 +172,28 @@ export function MapView({
 
         // Clicking a cluster zooms into it rather than selecting anything.
         map.on('click', 'clusters', (event) => {
-          if (!map) return
           const feature = event.features?.[0]
-          const clusterId: unknown = feature?.properties?.['cluster_id']
+          const clusterId: unknown = feature?.properties['cluster_id']
           if (typeof clusterId !== 'number') return
 
-          const source = map.getSource('shops')
-          if (!source || source.type !== 'geojson') return
+          const source = map.getSource<GeoJSONSource>('shops')
+          if (!source) return
 
           void source.getClusterExpansionZoom(clusterId).then((zoom) => {
-            if (!map || feature?.geometry.type !== 'Point') return
-            map.easeTo({
-              center: feature.geometry.coordinates as [number, number],
-              zoom,
-            })
+            if (feature?.geometry.type !== 'Point') return
+            const [lng, lat] = feature.geometry.coordinates
+            if (lng === undefined || lat === undefined) return
+            map.easeTo({ center: [lng, lat], zoom })
           })
         })
 
         map.on('click', 'shop-pins', (event) => {
-          const slug: unknown = event.features?.[0]?.properties?.['slug']
+          const slug: unknown = event.features?.[0]?.properties['slug']
           if (typeof slug === 'string') onSelectShopRef.current(slug)
         })
 
         // Clicking bare map clears the selection.
         map.on('click', (event) => {
-          if (!map) return
           const hits = map.queryRenderedFeatures(event.point, {
             layers: ['clusters', 'shop-pins'],
           })
@@ -181,10 +202,10 @@ export function MapView({
 
         for (const layer of ['clusters', 'shop-pins']) {
           map.on('mouseenter', layer, () => {
-            if (map) map.getCanvas().style.cursor = 'pointer'
+            map.getCanvas().style.cursor = 'pointer'
           })
           map.on('mouseleave', layer, () => {
-            if (map) map.getCanvas().style.cursor = ''
+            map.getCanvas().style.cursor = ''
           })
         }
       })
@@ -192,8 +213,10 @@ export function MapView({
 
     return () => {
       cancelled = true
+      styleReadyRef.current = false
       clearTimeout(debounce)
-      map?.remove()
+      resizeObserver?.disconnect()
+      created?.remove()
       mapRef.current = null
     }
   }, [])
@@ -201,15 +224,9 @@ export function MapView({
   // Push shop changes into the existing source instead of rebuilding the map.
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || !styleReadyRef.current) return
 
-    const apply = () => {
-      const source = map.getSource('shops')
-      if (source && source.type === 'geojson') source.setData(toGeoJSON(shops))
-    }
-
-    if (map.isStyleLoaded()) apply()
-    else map.once('load', apply)
+    map.getSource<GeoJSONSource>('shops')?.setData(toGeoJSON(shops))
   }, [shops])
 
   // Highlight whichever pin the list has selected.

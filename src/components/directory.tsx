@@ -26,8 +26,8 @@ export function Directory() {
     const requestId = ++requestIdRef.current
     const controller = new AbortController()
 
-    setLoading(true)
     void (async () => {
+      setLoading(true)
       try {
         const response = await fetch(`/api/shops?bounds=${bounds.join(',')}`, {
           signal: controller.signal,
