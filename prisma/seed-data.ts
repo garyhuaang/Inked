@@ -1,15 +1,39 @@
-import type { Artist, Shop } from '@/lib/types'
-
 /**
- * Placeholder data so the map and list can be built before Prisma and Neon exist.
+ * Seed input for the Dallas and Austin tables.
  *
- * These are INVENTED shops and artists at real-ish coordinates in Dallas and
- * Austin. None of it is scraped, and none of it describes a real business or
- * person — it is scaffolding to be replaced by the curated dataset in step 2 of
- * the spec's sequence.
+ * These are INVENTED shops and artists at real-ish coordinates. None of it is
+ * scraped, and none of it describes a real business or person — it is
+ * scaffolding to be replaced by the curated dataset in the spec's sequence.
+ *
+ * These types are deliberately NOT the API types in @/lib/types: this is what
+ * goes INTO the database, keyed by slug, not what comes out of it.
  */
 
-export const SHOPS: Shop[] = [
+type SeedShop = {
+  id: string
+  name: string
+  slug: string
+  address: string
+  city: 'dallas' | 'austin'
+  lat: number
+  lng: number
+  website: string | null
+  instagram: string | null
+}
+
+type SeedArtist = {
+  id: string
+  name: string
+  slug: string
+  instagram: string | null
+  acceptingClients: boolean
+  /** Style slugs, resolved to ids by the seed. */
+  styles: string[]
+  /** Shop slugs; the first is treated as primary. */
+  shopSlugs: string[]
+}
+
+export const SHOPS: SeedShop[] = [
   {
     id: '11111111-1111-4111-8111-000000000001',
     name: 'Deep Ellum Electric',
@@ -111,7 +135,7 @@ export const SHOPS: Shop[] = [
   },
 ]
 
-export const ARTISTS: Artist[] = [
+export const ARTISTS: SeedArtist[] = [
   {
     id: '33333333-3333-4333-8333-000000000001',
     name: 'Sam Ortiz',

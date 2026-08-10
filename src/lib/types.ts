@@ -1,4 +1,4 @@
-/** Shapes here mirror the tables sketched in Tattoo-Directory-Spec.md. */
+/** API shapes. The database schema itself lives in prisma/schema.prisma. */
 
 export type City = 'dallas' | 'austin'
 
@@ -14,16 +14,19 @@ export interface Shop {
   instagram: string | null
 }
 
+export interface Style {
+  slug: string
+  /** Display label, e.g. "Fine line". Comes from the styles table. */
+  name: string
+}
+
 export interface Artist {
   id: string
   name: string
   slug: string
   instagram: string | null
-  /** Style slugs; a `styles` table replaces this once Prisma lands. */
-  styles: string[]
+  styles: Style[]
   acceptingClients: boolean
-  /** Shop slugs. Many-to-many, per the `artist_shops` decision in the spec. */
-  shopSlugs: string[]
 }
 
 /** A shop plus the artists working there, which is what the list panel renders. */
