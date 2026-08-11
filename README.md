@@ -7,7 +7,7 @@ Next.js (App Router) · Tailwind · shadcn/ui · Redux Toolkit · Prisma · Neon
 Postgres · MapLibre with OpenFreeMap tiles.
 
 ## Live Deployment - Vercel
-- https://garyhuaang.github.io/sas-mrts/](https://inked-five.vercel.app/
+- https://inked-five.vercel.app
 
 ## Local setup
 
