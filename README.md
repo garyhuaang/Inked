@@ -6,6 +6,9 @@ where they work, and what they do. Browse by map: the viewport is the query.
 Next.js (App Router) · Tailwind · shadcn/ui · Redux Toolkit · Prisma · Neon
 Postgres · MapLibre with OpenFreeMap tiles.
 
+## Live Deployment - Vercel
+- https://garyhuaang.github.io/sas-mrts/](https://inked-five.vercel.app/
+
 ## Local setup
 
 ```bash
