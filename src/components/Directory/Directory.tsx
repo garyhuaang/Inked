@@ -4,12 +4,15 @@ import { MapView } from "@/components/MapView";
 import { ShopList } from "@/components/ShopList";
 import { useAppSelector, useGetShopsQuery } from "@/lib/store";
 
-import { skipToken } from "@reduxjs/toolkit/query";
-
 /** Layout only. Cancellation, de-duping and loading state belong to RTK Query. */
 export function Directory() {
   const bounds = useAppSelector((state) => state.ui.bounds);
-  const { data, isFetching, isError } = useGetShopsQuery(bounds ?? skipToken);
+  const { data, isFetching, isError } = useGetShopsQuery(bounds);
+
+  // The first client render happens before the query subscription starts, so
+  // `isFetching` alone flashes "0 artists" for a frame during hydration.
+  // "No data yet" is loading too — unless the fetch actually failed.
+  const loading = isFetching || (data === undefined && !isError);
 
   const shops = data?.items ?? [];
 
@@ -31,7 +34,7 @@ export function Directory() {
         <aside className="h-1/2 w-full border-t md:h-auto md:w-96 md:border-t-0 md:border-r">
           <ShopList
             shops={shops}
-            loading={isFetching}
+            loading={loading}
             truncated={data?.truncated ?? false}
           />
         </aside>
