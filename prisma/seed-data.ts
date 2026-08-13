@@ -10,28 +10,28 @@
  */
 
 type SeedShop = {
-  id: string
-  name: string
-  slug: string
-  address: string
-  city: 'dallas' | 'austin'
-  lat: number
-  lng: number
-  website: string | null
-  instagram: string | null
-}
+  id: string;
+  name: string;
+  slug: string;
+  address: string;
+  city: 'dallas' | 'austin';
+  lat: number;
+  lng: number;
+  website: string | null;
+  instagram: string | null;
+};
 
 type SeedArtist = {
-  id: string
-  name: string
-  slug: string
-  instagram: string | null
-  acceptingClients: boolean
+  id: string;
+  name: string;
+  slug: string;
+  instagram: string | null;
+  acceptingClients: boolean;
   /** Style slugs, resolved to ids by the seed. */
-  styles: string[]
+  styles: string[];
   /** Shop slugs; the first is treated as primary. */
-  shopSlugs: string[]
-}
+  shopSlugs: string[];
+};
 
 export const SHOPS: SeedShop[] = [
   {
@@ -133,7 +133,7 @@ export const SHOPS: SeedShop[] = [
     website: null,
     instagram: null,
   },
-]
+];
 
 export const ARTISTS: SeedArtist[] = [
   {
@@ -253,11 +253,11 @@ export const ARTISTS: SeedArtist[] = [
     acceptingClients: true,
     shopSlugs: ['hyde-park-fine-line'],
   },
-]
+];
 
 export const STYLE_LABELS: Record<string, string> = {
   traditional: 'Traditional',
   blackwork: 'Blackwork',
   'fine-line': 'Fine line',
   japanese: 'Japanese',
-}
+};

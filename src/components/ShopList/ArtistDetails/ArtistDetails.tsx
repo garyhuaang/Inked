@@ -1,5 +1,5 @@
-import { Badge } from "@/components/common/badge";
-import type { ArtistDetailsProps } from "./ArtistDetails.types";
+import { Badge } from '@/components/common/badge';
+import type { ArtistDetailsProps } from './ArtistDetails.types';
 
 function ArtistDetails({ artist }: ArtistDetailsProps) {
   return (

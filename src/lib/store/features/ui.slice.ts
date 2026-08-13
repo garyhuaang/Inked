@@ -1,6 +1,6 @@
-import type { Bounds } from "@/lib/types";
+import type { Bounds } from '@/lib/types';
 
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 /**
  * Approximate viewport of MapView's INITIAL_CENTER/INITIAL_ZOOM. Seeding it
@@ -22,7 +22,7 @@ const initialState: UiState = {
 };
 
 const uiSlice = createSlice({
-  name: "ui",
+  name: 'ui',
   initialState,
   reducers: {
     setBounds: (state, action: PayloadAction<Bounds>) => {

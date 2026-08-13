@@ -1,6 +1,6 @@
-import { parseBounds } from '@/lib/bounds'
-import { prisma } from '@/lib/db'
-import type { ShopWithArtists, ShopsResponse } from '@/lib/types'
+import { parseBounds } from '@/lib/bounds';
+import { prisma } from '@/lib/db';
+import type { ShopWithArtists, ShopsResponse } from '@/lib/types';
 
 /**
  * GET /api/shops?bounds=swLat,swLng,neLat,neLng&style=&accepting=
@@ -10,35 +10,35 @@ import type { ShopWithArtists, ShopsResponse } from '@/lib/types'
  * rectangles.
  */
 
-const DEFAULT_LIMIT = 100
-const MAX_LIMIT = 500
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 500;
 
 export async function GET(request: Request): Promise<Response> {
-  const { searchParams } = new URL(request.url)
+  const { searchParams } = new URL(request.url);
 
-  const rawBounds = searchParams.get('bounds')
-  const bounds = parseBounds(rawBounds)
+  const rawBounds = searchParams.get('bounds');
+  const bounds = parseBounds(rawBounds);
   if (rawBounds !== null && bounds === null) {
     return Response.json(
       { error: 'bounds must be swLat,swLng,neLat,neLng' },
       { status: 400 },
-    )
+    );
   }
 
-  const rawLimit = Number(searchParams.get('limit') ?? DEFAULT_LIMIT)
+  const rawLimit = Number(searchParams.get('limit') ?? DEFAULT_LIMIT);
   const limit = Number.isFinite(rawLimit)
     ? Math.min(Math.max(Math.trunc(rawLimit), 1), MAX_LIMIT)
-    : DEFAULT_LIMIT
+    : DEFAULT_LIMIT;
 
-  const style = searchParams.get('style')
-  const accepting = searchParams.get('accepting')
+  const style = searchParams.get('style');
+  const accepting = searchParams.get('accepting');
 
   const artistWhere = {
     ...(accepting === 'true' ? { acceptingClients: true } : {}),
     ...(accepting === 'false' ? { acceptingClients: false } : {}),
     ...(style ? { styles: { some: { style: { slug: style } } } } : {}),
-  }
-  const filtered = Object.keys(artistWhere).length > 0
+  };
+  const filtered = Object.keys(artistWhere).length > 0;
 
   const rows = await prisma.shop.findMany({
     where: {
@@ -52,7 +52,9 @@ export async function GET(request: Request): Promise<Response> {
     include: {
       artists: {
         ...(filtered && { where: { artist: artistWhere } }),
-        include: { artist: { include: { styles: { include: { style: true } } } } },
+        include: {
+          artist: { include: { styles: { include: { style: true } } } },
+        },
         orderBy: { artist: { name: 'asc' } },
       },
     },
@@ -60,7 +62,7 @@ export async function GET(request: Request): Promise<Response> {
     orderBy: [{ name: 'asc' }, { id: 'asc' }],
     // One extra row is how we learn there were more without a second COUNT.
     take: limit + 1,
-  })
+  });
 
   const items: ShopWithArtists[] = rows.slice(0, limit).map((shop) => ({
     id: shop.id,
@@ -83,9 +85,9 @@ export async function GET(request: Request): Promise<Response> {
         name: style.name,
       })),
     })),
-  }))
+  }));
 
-  const body: ShopsResponse = { items, truncated: rows.length > limit }
+  const body: ShopsResponse = { items, truncated: rows.length > limit };
 
-  return Response.json(body)
+  return Response.json(body);
 }

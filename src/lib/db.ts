@@ -1,5 +1,5 @@
-import { PrismaNeon } from '@prisma/adapter-neon'
-import { PrismaClient } from '@/generated/prisma/client'
+import { PrismaNeon } from '@prisma/adapter-neon';
+import { PrismaClient } from '@/generated/prisma/client';
 
 /**
  * Prisma 7 requires a driver adapter. PrismaNeon talks to Neon over its
@@ -10,15 +10,15 @@ import { PrismaClient } from '@/generated/prisma/client'
  * `new PrismaClient()` would open a fresh pool each time until Neon refuses
  * more connections. Cache it on globalThis outside production.
  */
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
-  const connectionString = process.env['DATABASE_URL']
-  if (!connectionString) throw new Error('DATABASE_URL is not set')
+  const connectionString = process.env['DATABASE_URL'];
+  if (!connectionString) throw new Error('DATABASE_URL is not set');
 
-  return new PrismaClient({ adapter: new PrismaNeon({ connectionString }) })
+  return new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
 }
 
-export const prisma = globalForPrisma.prisma ?? createClient()
+export const prisma = globalForPrisma.prisma ?? createClient();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
