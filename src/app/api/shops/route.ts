@@ -1,5 +1,6 @@
+import { parseBounds } from '@/lib/bounds'
 import { prisma } from '@/lib/db'
-import type { Bounds, ShopWithArtists, ShopsResponse } from '@/lib/types'
+import type { ShopWithArtists, ShopsResponse } from '@/lib/types'
 
 /**
  * GET /api/shops?bounds=swLat,swLng,neLat,neLng&style=&accepting=
@@ -11,19 +12,6 @@ import type { Bounds, ShopWithArtists, ShopsResponse } from '@/lib/types'
 
 const DEFAULT_LIMIT = 100
 const MAX_LIMIT = 500
-
-function parseBounds(raw: string | null): Bounds | null {
-  if (!raw) return null
-
-  const parts = raw.split(',').map(Number)
-  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return null
-
-  const [swLat, swLng, neLat, neLng] = parts as Bounds
-  // A viewport crossing the antimeridian would invert lng; out of scope for Texas.
-  if (swLat > neLat || swLng > neLng) return null
-
-  return [swLat, swLng, neLat, neLng]
-}
 
 export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url)
