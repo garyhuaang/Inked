@@ -58,6 +58,12 @@ export function MapView({ shops }: MapViewProps) {
       const maplibregl = await import('maplibre-gl')
       if (cancelled) return
 
+      // MapLibre's default worker URL comes from `import.meta.url`, which
+      // Turbopack rewrites to a non-http value; the fallback then spawns the
+      // page itself as the worker, and no tiles ever load. Point it at the
+      // copy that scripts/copy-maplibre-worker.mjs keeps in public/.
+      maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
+
       const map = new maplibregl.Map({
         container,
         style: STYLE_URL,
