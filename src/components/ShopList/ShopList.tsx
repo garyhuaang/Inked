@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/common/card";
-import { Skeleton } from "@/components/common/skeleton";
-import { toggleShop, useAppDispatch, useAppSelector } from "@/lib/store";
-import ArtistDetails from "./ArtistDetails/ArtistDetails";
-import type { ShopListProps } from "./ShopList.types";
+} from '@/components/common/card';
+import { Skeleton } from '@/components/common/skeleton';
+import { toggleShop, useAppDispatch, useAppSelector } from '@/lib/store';
+import ArtistDetails from './ArtistDetails/ArtistDetails';
+import type { ShopListProps } from './ShopList.types';
 
 export function ShopList({ shops, loading, truncated }: ShopListProps) {
   const dispatch = useAppDispatch();
@@ -25,13 +25,13 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
       <div className="border-b px-4 py-3">
         <h2 className="text-sm font-medium">
           {loading
-            ? "Searching this area…"
+            ? 'Searching this area…'
             : `${String(artistCount)} artists at ${String(shops.length)} shops`}
         </h2>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {truncated
-            ? "Too many results — zoom in to see them all."
-            : "Showing what is inside the map view."}
+            ? 'Too many results — zoom in to see them all.'
+            : 'Showing what is inside the map view.'}
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
             <Skeleton className="h-28 w-full" />
           </div>
         ) : shops.length === 0 ? (
-          <p className="text-muted-foreground px-1 py-8 text-center text-sm">
+          <p className="px-1 py-8 text-center text-sm text-muted-foreground">
             No shops in view. Pan or zoom out.
           </p>
         ) : (
@@ -54,19 +54,19 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
                   onClick={() => dispatch(toggleShop(shop.slug))}
                   className={`cursor-pointer gap-3 py-4 transition-colors ${
                     shop.slug === selectedSlug
-                      ? "border-primary bg-accent"
-                      : "hover:bg-accent/50"
+                      ? 'border-primary bg-accent'
+                      : 'hover:bg-accent/50'
                   }`}
                 >
                   <CardHeader className="px-4">
                     <CardTitle className="text-base">{shop.name}</CardTitle>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {shop.address}
                     </p>
                   </CardHeader>
                   <CardContent className="px-4">
                     {shop.artists.length === 0 ? (
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-xs text-muted-foreground">
                         No artists listed yet.
                       </p>
                     ) : (

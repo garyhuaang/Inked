@@ -7,6 +7,7 @@ Next.js (App Router) · Tailwind · shadcn/ui · Redux Toolkit · Prisma · Neon
 Postgres · MapLibre with OpenFreeMap tiles.
 
 ## Live Deployment - Vercel
+
 - https://inked-five.vercel.app
 
 ## Local setup
@@ -22,10 +23,10 @@ npm run dev
 `.env` needs two URLs from the Neon dashboard, and they are not
 interchangeable:
 
-| Variable | Which Neon URL | Used by |
-|---|---|---|
-| `DATABASE_URL` | pooled — host contains `-pooler` | the app at runtime |
-| `DIRECT_URL` | direct — no `-pooler` | Prisma CLI, migrations |
+| Variable       | Which Neon URL                   | Used by                |
+| -------------- | -------------------------------- | ---------------------- |
+| `DATABASE_URL` | pooled — host contains `-pooler` | the app at runtime     |
+| `DIRECT_URL`   | direct — no `-pooler`            | Prisma CLI, migrations |
 
 Migrations run DDL, which fails through Neon's connection pooler. The app wants
 the pooler, because serverless functions open many short-lived connections.

@@ -1,20 +1,20 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-import { StoreProvider } from "@/lib/providers";
+import type { Metadata } from 'next';
+import './globals.css';
+import { Geist } from 'next/font/google';
+import { cn } from '@/lib/utils';
+import { StoreProvider } from '@/lib/providers';
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "Inked — Tattoo Artist Directory",
+  title: 'Inked — Tattoo Artist Directory',
   description:
-    "Find tattoo artists in Dallas and Austin by style, shop, and neighbourhood.",
+    'Find tattoo artists in Dallas and Austin by style, shop, and neighbourhood.',
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={cn('font-sans', geist.variable)}>
       <body>
         <StoreProvider>{children}</StoreProvider>
       </body>

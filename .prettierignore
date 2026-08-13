@@ -1,0 +1,5 @@
+# build output and generated code
+.next
+src/generated
+public/maplibre
+package-lock.json

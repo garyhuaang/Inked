@@ -34,17 +34,17 @@ machine (HTTP 200, API returning rows from Postgres).
 
 ## 1. What you need first
 
-| Thing | Why |
-|---|---|
-| Node 20+ | Next 16 requires it |
-| A GitHub repo | Vercel deploys from it; this is what makes deploys automatic |
-| A Neon account | Free Postgres, no credit card |
-| A Vercel account | Free hosting, auto-detects Next.js |
+| Thing            | Why                                                          |
+| ---------------- | ------------------------------------------------------------ |
+| Node 20+         | Next 16 requires it                                          |
+| A GitHub repo    | Vercel deploys from it; this is what makes deploys automatic |
+| A Neon account   | Free Postgres, no credit card                                |
+| A Vercel account | Free hosting, auto-detects Next.js                           |
 
 **Decide your branch and PR workflow before you start.** This project used one
 branch per unit of work (`INK-0`, `INK-1`, …), each merged via a PR on GitHub.
 That is worth doing even solo: it forces each change to be small enough to
-explain, and it gives you a place to write down *why*.
+explain, and it gives you a place to write down _why_.
 
 ---
 
@@ -91,7 +91,7 @@ npx shadcn@latest add button card badge input skeleton
 ```
 
 **What shadcn/ui is, and why it is not a dependency.** Most component libraries
-are packages you import from. shadcn *copies source files into your repo*. You
+are packages you import from. shadcn _copies source files into your repo_. You
 own them, and you edit them directly. The tradeoff: no automatic upgrades, but
 no fighting a library's opinions either.
 
@@ -101,7 +101,7 @@ no fighting a library's opinions either.
 - `-p nova` — a preset (Lucide icons + Geist font). Without `-p`, the CLI
   **prompts interactively and hangs** in a non-interactive shell.
 - Do **not** use `-d`. It means "defaults", and its default is
-  `--template=next`, which scaffolds a *brand new project* on top of yours.
+  `--template=next`, which scaffolds a _brand new project_ on top of yours.
 
 ### `components.json` decides where files land
 
@@ -130,7 +130,7 @@ npm install maplibre-gl
    Google needs a separate MarkerClusterer library.
 3. **The map style is JSON**, so it can be themed to match your design tokens.
 
-MapLibre is the *renderer*; something else must serve the *tiles*. OpenFreeMap
+MapLibre is the _renderer_; something else must serve the _tiles_. OpenFreeMap
 is the tile provider. They are separate concerns.
 
 ### Three things that will bite you in Next.js
@@ -140,7 +140,7 @@ evaluated on the server during SSR, so a top-level `import` crashes the build.
 Import it dynamically, inside the effect:
 
 ```ts
-const maplibregl = await import('maplibre-gl')
+const maplibregl = await import('maplibre-gl');
 ```
 
 **The container is often 0px tall when your effect runs**, because CSS has not
@@ -149,12 +149,14 @@ the canvas is unsized and **the map never requests a single tile**. Symptom: a
 blank map, no errors, no network activity. Fix:
 
 ```ts
-const observer = new ResizeObserver(() => { map.resize() })
-observer.observe(container)
+const observer = new ResizeObserver(() => {
+  map.resize();
+});
+observer.observe(container);
 ```
 
 **Use `style.load`, not `load`, to add sources and layers.** `load` waits for a
-*first visually complete render*, which never happens if the canvas started
+_first visually complete render_, which never happens if the canvas started
 unsized — so your setup code never runs. `style.load` fires when the style is
 parsed, which is all you need.
 
@@ -167,7 +169,7 @@ npm install @reduxjs/toolkit react-redux
 ```
 
 **Was Redux necessary?** Honestly, no — not for this app's size. It was a
-deliberate choice to practise a pattern used at work. What it *did* earn:
+deliberate choice to practise a pattern used at work. What it _did_ earn:
 RTK Query deleted a meaningful amount of hand-written code (see below).
 
 ### The store must be a factory, not a singleton
@@ -194,7 +196,7 @@ Redux's own Next.js docs show `useRef`. Modern React lint rules reject reading
 `ref.current` during render, and it flagged this immediately:
 
 ```ts
-const [store] = useState(makeStore)   // lazy initializer: runs once
+const [store] = useState(makeStore); // lazy initializer: runs once
 ```
 
 Same guarantee, render-safe.
@@ -211,7 +213,7 @@ Before, `Directory.tsx` hand-rolled all of this:
 After, it is one line:
 
 ```ts
-const { data, isFetching, isError } = useGetShopsQuery(bounds ?? skipToken)
+const { data, isFetching, isError } = useGetShopsQuery(bounds ?? skipToken);
 ```
 
 `skipToken` means "no bounds yet, do not fire a request". The component went
@@ -269,24 +271,26 @@ npm install @prisma/adapter-neon @neondatabase/serverless
 ```
 
 ```ts
-new PrismaClient({ adapter: new PrismaNeon({ connectionString }) })
+new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
 ```
 
 ### Neon gives you TWO connection strings and they are not interchangeable
 
 This is the single most important thing in this document.
 
-| Variable | Neon URL | Used by | Why |
-|---|---|---|---|
-| `DATABASE_URL` | **pooled** (`-pooler` in the host) | the app at runtime | Serverless functions open many short-lived connections; the pooler exists for exactly that |
-| `DIRECT_URL` | **direct** (no `-pooler`) | Prisma CLI / migrations | Migrations run DDL, which fails through the pooler |
+| Variable       | Neon URL                           | Used by                 | Why                                                                                        |
+| -------------- | ---------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| `DATABASE_URL` | **pooled** (`-pooler` in the host) | the app at runtime      | Serverless functions open many short-lived connections; the pooler exists for exactly that |
+| `DIRECT_URL`   | **direct** (no `-pooler`)          | Prisma CLI / migrations | Migrations run DDL, which fails through the pooler                                         |
 
 Since Prisma 7 has no `directUrl` field, the split is expressed by pointing the
-*config* at the direct URL:
+_config_ at the direct URL:
 
 ```ts
 // prisma.config.ts — used by the CLI only
-datasource: { url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"] }
+datasource: {
+  url: process.env['DIRECT_URL'] ?? process.env['DATABASE_URL'];
+}
 ```
 
 while the runtime client reads `DATABASE_URL`. One hyphen is the whole
@@ -358,7 +362,9 @@ npm install --save-dev tsx
 `tsx` runs TypeScript directly. Wire it up in `prisma.config.ts`:
 
 ```ts
-migrations: { seed: "tsx prisma/seed.ts" }
+migrations: {
+  seed: 'tsx prisma/seed.ts';
+}
 ```
 
 **Gotcha: top-level `await` fails.** Without `"type": "module"` in
@@ -421,7 +427,7 @@ never generates or resets — it is the safe one for CI.
 1. Import the GitHub repo. Next.js is auto-detected; do not override the build
    command, it comes from `package.json`.
 2. **Add both environment variables before the first deploy.** `src/lib/db.ts`
-   throws at module load if `DATABASE_URL` is missing, so the build *fails*
+   throws at module load if `DATABASE_URL` is missing, so the build _fails_
    rather than degrading.
 3. Tick **Production and Preview** (and Development if you use `vercel dev`).
    Production-only means every preview deploy fails.
@@ -462,14 +468,14 @@ had been pasted into Vercel instead of the real `.env`.
 ### `Badge` imported from the wrong package
 
 ```ts
-import { Badge } from "lucide-react";      // ❌ an SVG icon
-import { Badge } from "@/components/common/badge";  // ✅ the component
+import { Badge } from 'lucide-react'; // ❌ an SVG icon
+import { Badge } from '@/components/common/badge'; // ✅ the component
 ```
 
-Lucide exports a `Badge` *icon*, so the import resolves and looks plausible.
+Lucide exports a `Badge` _icon_, so the import resolves and looks plausible.
 Icons ignore `children`, so every label would have rendered as an empty glyph.
-**Lesson:** when an import "exists" but the props are rejected, check *which
-package* you imported from.
+**Lesson:** when an import "exists" but the props are rejected, check _which
+package_ you imported from.
 
 ### Two real map bugs, found by measuring rather than guessing
 
@@ -479,7 +485,7 @@ Both produced the same symptom — a blank map with no errors:
    Fixed with `ResizeObserver`.
 2. **`setData` never called.** The code did
    `if (map.isStyleLoaded()) apply() else map.once('style.load', apply)`.
-   `style.load` had *already fired*, so the `once` never ran again — but
+   `style.load` had _already fired_, so the `once` never ran again — but
    `isStyleLoaded()` returns false until **every source** has loaded, so the
    first branch failed too. Neither ran; the map had zero features. Fixed with
    an explicit `readyRef` flag set inside the `style.load` handler.
@@ -514,9 +520,9 @@ Short explanations of things this project uses that are easy to cargo-cult.
 
 **Server vs Client Components.** In the App Router everything is a Server
 Component by default — it runs on the server and ships no JavaScript. `'use
-client'` marks a boundary: that file *and everything it imports* goes to the
+client'` marks a boundary: that file _and everything it imports_ goes to the
 browser. You need it for state, effects, and event handlers. A Client Component
-is still server-*rendered* once for the initial HTML, which is why
+is still server-_rendered_ once for the initial HTML, which is why
 `maplibre-gl`'s `window` access breaks at import time.
 
 **Why the store is a factory.** See §5. On the server, module scope is shared
@@ -555,7 +561,7 @@ semicolons, `MapView.tsx` uses single and none. Prettier was applied to some
 files and not others.
 
 **Fix:** add Prettier with a committed config, run it across the repo once, and
-add a `format:check` step. Do this *first* — it makes every later diff readable.
+add a `format:check` step. Do this _first_ — it makes every later diff readable.
 
 ### `MapView.tsx` is 211 lines and does too much
 

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { MapView } from "@/components/MapView";
-import { ShopList } from "@/components/ShopList";
-import { useAppSelector, useGetShopsQuery } from "@/lib/store";
+import { MapView } from '@/components/MapView';
+import { ShopList } from '@/components/ShopList';
+import { useAppSelector, useGetShopsQuery } from '@/lib/store';
 
 export function Directory() {
   const bounds = useAppSelector((state) => state.ui.bounds);
@@ -15,12 +15,12 @@ export function Directory() {
       <header className="flex items-center justify-between border-b px-4 py-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">Inked</h1>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             Tattoo artists in Dallas and Austin
           </p>
         </div>
         {isError ? (
-          <p className="text-destructive text-xs">Could not load this area.</p>
+          <p className="text-xs text-destructive">Could not load this area.</p>
         ) : null}
       </header>
 

@@ -1,6 +1,6 @@
-import type { Bounds, ShopsResponse } from '@/lib/types'
+import type { Bounds, ShopsResponse } from '@/lib/types';
 
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const apiSlice = createApi({
   reducerPath: 'api',
@@ -10,6 +10,6 @@ export const apiSlice = createApi({
       query: (bounds) => `/shops?bounds=${bounds.join(',')}`,
     }),
   }),
-})
+});
 
-export const { useGetShopsQuery } = apiSlice
+export const { useGetShopsQuery } = apiSlice;

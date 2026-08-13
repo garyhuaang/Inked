@@ -12,15 +12,15 @@
  *
  * Runs from postinstall; re-runs on every install so upgrades stay in sync.
  */
-import { copyFile, mkdir } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { copyFile, mkdir } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const src = join(root, 'node_modules', 'maplibre-gl', 'dist')
-const dest = join(root, 'public', 'maplibre')
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const src = join(root, 'node_modules', 'maplibre-gl', 'dist');
+const dest = join(root, 'public', 'maplibre');
 
-await mkdir(dest, { recursive: true })
+await mkdir(dest, { recursive: true });
 for (const file of ['maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs']) {
-  await copyFile(join(src, file), join(dest, file))
+  await copyFile(join(src, file), join(dest, file));
 }

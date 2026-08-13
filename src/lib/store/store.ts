@@ -1,14 +1,14 @@
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 
-import { apiSlice } from './api'
-import { uiReducer } from './features'
+import { apiSlice } from './api';
+import { uiReducer } from './features';
 
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 const rootReducer = combineReducers({
   ui: uiReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
-})
+});
 
 /**
  * A factory rather than sas-mrts' exported singleton: this app renders on the
@@ -20,11 +20,11 @@ export const makeStore = () =>
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(apiSlice.middleware),
-  })
+  });
 
-export type AppStore = ReturnType<typeof makeStore>
-export type RootState = ReturnType<AppStore['getState']>
-export type AppDispatch = AppStore['dispatch']
+export type AppStore = ReturnType<typeof makeStore>;
+export type RootState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];
 
-export const useAppSelector = useSelector.withTypes<RootState>()
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+export const useAppSelector = useSelector.withTypes<RootState>();
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();

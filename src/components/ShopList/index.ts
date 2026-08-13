@@ -1,1 +1,1 @@
-export * from './ShopList'
+export * from './ShopList';
