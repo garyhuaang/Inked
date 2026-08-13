@@ -4,16 +4,10 @@ import { MapView } from "@/components/MapView";
 import { ShopList } from "@/components/ShopList";
 import { useAppSelector, useGetShopsQuery } from "@/lib/store";
 
-/** Layout only. Cancellation, de-duping and loading state belong to RTK Query. */
 export function Directory() {
   const bounds = useAppSelector((state) => state.ui.bounds);
   const { data, isFetching, isError } = useGetShopsQuery(bounds);
-
-  // The first client render happens before the query subscription starts, so
-  // `isFetching` alone flashes "0 artists" for a frame during hydration.
-  // "No data yet" is loading too — unless the fetch actually failed.
   const loading = isFetching || (data === undefined && !isError);
-
   const shops = data?.items ?? [];
 
   return (
