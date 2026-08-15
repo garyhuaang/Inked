@@ -7,7 +7,8 @@ import { useAppSelector, useGetShopsQuery } from '@/lib/store';
 export function Directory() {
   const bounds = useAppSelector((state) => state.ui.bounds);
   const { data, isFetching, isError } = useGetShopsQuery(bounds);
-  const loading = isFetching || (data === undefined && !isError);
+  const awaitingFirstResponse = data === undefined && !isError;
+  const loading = isFetching || awaitingFirstResponse;
   const shops = data?.items ?? [];
 
   return (
@@ -20,12 +21,17 @@ export function Directory() {
           </p>
         </div>
         {isError ? (
-          <p className="text-xs text-destructive">Could not load this area.</p>
+          <p role="alert" className="text-xs text-destructive">
+            Could not load this area.
+          </p>
         ) : null}
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col-reverse md:flex-row">
-        <aside className="h-1/2 w-full border-t md:h-auto md:w-96 md:border-t-0 md:border-r">
+        <aside
+          aria-label="Shop list"
+          className="h-1/2 w-full border-t md:h-auto md:w-96 md:border-t-0 md:border-r"
+        >
           <ShopList
             shops={shops}
             loading={loading}
@@ -33,7 +39,7 @@ export function Directory() {
           />
         </aside>
 
-        <main className="min-h-0 flex-1">
+        <main aria-label="Map" className="min-h-0 flex-1">
           <MapView shops={shops} />
         </main>
       </div>

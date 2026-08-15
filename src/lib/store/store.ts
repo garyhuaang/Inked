@@ -10,11 +10,6 @@ const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
 
-/**
- * A factory rather than sas-mrts' exported singleton: this app renders on the
- * server, where one module-level store would be shared across every request —
- * and so across users. StoreProvider makes one per client instead.
- */
 export const makeStore = () =>
   configureStore({
     reducer: rootReducer,

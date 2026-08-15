@@ -38,7 +38,7 @@ export async function GET(request: Request): Promise<Response> {
     ...(accepting === 'false' ? { acceptingClients: false } : {}),
     ...(style ? { styles: { some: { style: { slug: style } } } } : {}),
   };
-  const filtered = Object.keys(artistWhere).length > 0;
+  const hasArtistFilter = Object.keys(artistWhere).length > 0;
 
   const rows = await prisma.shop.findMany({
     where: {
@@ -47,11 +47,11 @@ export async function GET(request: Request): Promise<Response> {
         lng: { gte: bounds[1], lte: bounds[3] },
       }),
       // A style filter matching nobody at a shop should drop the pin too.
-      ...(filtered && { artists: { some: { artist: artistWhere } } }),
+      ...(hasArtistFilter && { artists: { some: { artist: artistWhere } } }),
     },
     include: {
       artists: {
-        ...(filtered && { where: { artist: artistWhere } }),
+        ...(hasArtistFilter && { where: { artist: artistWhere } }),
         include: {
           artist: { include: { styles: { include: { style: true } } } },
         },

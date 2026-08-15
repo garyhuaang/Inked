@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/common/card';
+import { Card, CardContent, CardHeader } from '@/components/common/card';
 import { Skeleton } from '@/components/common/skeleton';
 import { toggleShop, useAppDispatch, useAppSelector } from '@/lib/store';
 import ArtistDetails from './ArtistDetails/ArtistDetails';
@@ -21,9 +16,16 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
   );
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-medium">
+    <section
+      aria-labelledby="shop-list-heading"
+      className="flex h-full flex-col"
+    >
+      <header className="border-b px-4 py-3">
+        <h2
+          id="shop-list-heading"
+          aria-live="polite"
+          className="text-sm font-medium"
+        >
           {loading
             ? 'Searching this area…'
             : `${String(artistCount)} artists at ${String(shops.length)} shops`}
@@ -33,11 +35,11 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
             ? 'Too many results — zoom in to see them all.'
             : 'Showing what is inside the map view.'}
         </p>
-      </div>
+      </header>
 
       <div className="flex-1 overflow-y-auto p-3">
         {loading && shops.length === 0 ? (
-          <div className="space-y-3">
+          <div aria-hidden="true" className="space-y-3">
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
@@ -51,15 +53,23 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
             {shops.map((shop) => (
               <li key={shop.id}>
                 <Card
-                  onClick={() => dispatch(toggleShop(shop.slug))}
-                  className={`cursor-pointer gap-3 py-4 transition-colors ${
+                  className={`relative gap-3 py-4 transition-colors ${
                     shop.slug === selectedSlug
                       ? 'border-primary bg-accent'
                       : 'hover:bg-accent/50'
                   }`}
                 >
                   <CardHeader className="px-4">
-                    <CardTitle className="text-base">{shop.name}</CardTitle>
+                    <h3 className="text-base leading-snug font-medium">
+                      <button
+                        type="button"
+                        onClick={() => dispatch(toggleShop(shop.slug))}
+                        aria-pressed={shop.slug === selectedSlug}
+                        className="cursor-pointer text-left after:absolute after:inset-0"
+                      >
+                        {shop.name}
+                      </button>
+                    </h3>
                     <p className="text-xs text-muted-foreground">
                       {shop.address}
                     </p>
@@ -83,6 +93,6 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
           </ul>
         )}
       </div>
-    </div>
+    </section>
   );
 }
