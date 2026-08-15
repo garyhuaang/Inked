@@ -52,8 +52,7 @@ model Artist {
   @@index([name, id])
   @@map("artists")
 }
-
-// 
+ 
 model ArtistShop {
   artistId  String  @map("artist_id") @db.Uuid
   shopId    String  @map("shop_id") @db.Uuid
@@ -63,8 +62,8 @@ model ArtistShop {
   artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
   shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  @@id([artistId, shopId])   
-  @@index([shopId]) // The PK only serves artist->shops; /api/shops joins the other way.
+  @@id([artistId, shopId])  // The PK only serves artist->shops; /api/shops joins the other way.
+  @@index([shopId]) 
   @@map("artist_shops")
 }
 
@@ -85,7 +84,7 @@ model ArtistStyle {
   artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
   style  Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
 
-  @@id([artistId, styleId])
-  @@index([styleId])  // Reverse direction: style->artists queries and Style deletion cascades.
+  @@id([artistId, styleId]) // Reverse direction: style->artists queries and Style deletion cascades.
+  @@index([styleId])
   @@map("artist_styles")
 }
