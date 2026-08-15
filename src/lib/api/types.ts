@@ -1,13 +1,14 @@
 /** API shapes. The database schema itself lives in prisma/schema.prisma. */
 
-export type City = 'dallas' | 'austin';
+export type Metro = 'dfw' | 'austin';
 
 export interface Shop {
   id: string;
   name: string;
   slug: string;
   address: string;
-  city: City;
+  city: string;
+  metro: Metro;
   lat: number;
   lng: number;
   website: string | null;
@@ -16,7 +17,6 @@ export interface Shop {
 
 export interface Style {
   slug: string;
-  /** Display label, e.g. "Fine line". Comes from the styles table. */
   name: string;
 }
 
@@ -29,7 +29,6 @@ export interface Artist {
   acceptingClients: boolean;
 }
 
-/** A shop plus the artists working there, which is what the list panel renders. */
 export interface ShopWithArtists extends Shop {
   artists: Artist[];
 }
@@ -39,6 +38,5 @@ export type Bounds = [number, number, number, number];
 
 export interface ShopsResponse {
   items: ShopWithArtists[];
-  /** True when the viewport matched more shops than `limit`. Drives "zoom in". */
   truncated: boolean;
 }

@@ -17,7 +17,7 @@ export function Directory() {
         <div>
           <h1 className="text-lg font-semibold tracking-tight">Inked</h1>
           <p className="text-xs text-muted-foreground">
-            Tattoo artists in Dallas and Austin
+            Tattoo artists across the DFW and Austin metros
           </p>
         </div>
         {isError ? (

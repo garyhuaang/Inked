@@ -2,14 +2,6 @@ import { parseBounds } from '@/lib/api/bounds';
 import { prisma } from '@/lib/db';
 import type { ShopWithArtists, ShopsResponse } from '@/lib/api/types';
 
-/**
- * GET /api/shops?bounds=swLat,swLng,neLat,neLng&style=&accepting=
- *
- * The bounding box is two BETWEENs against shops.lat / shops.lng, served by the
- * shops_lat_lng_idx index. PostGIS only earns its keep once queries stop being
- * rectangles.
- */
-
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
 
@@ -70,6 +62,7 @@ export async function GET(request: Request): Promise<Response> {
     slug: shop.slug,
     address: shop.address,
     city: shop.city,
+    metro: shop.metro,
     lat: shop.lat,
     lng: shop.lng,
     website: shop.website,

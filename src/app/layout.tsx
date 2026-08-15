@@ -9,13 +9,13 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 export const metadata: Metadata = {
   title: 'Inked — Tattoo Artist Directory',
   description:
-    'Find tattoo artists in Dallas and Austin by style, shop, and neighbourhood.',
+    'Find tattoo artists across the DFW and Austin metros by style, shop, and neighbourhood.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={cn('font-sans', geist.variable)}>
-      <body>
+      <body suppressHydrationWarning>
         <StoreProvider>{children}</StoreProvider>
       </body>
     </html>

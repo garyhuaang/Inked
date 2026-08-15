@@ -1,6 +1,6 @@
 import type { Bounds } from '@/lib/api/types';
 
-/** Parse `swLat,swLng,neLat,neLng` from a query string; null if malformed. */
+/** Parse a `?bounds=` query param; null if malformed. */
 export function parseBounds(raw: string | null): Bounds | null {
   if (!raw) return null;
 
