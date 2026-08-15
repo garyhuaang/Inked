@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={cn('font-sans', geist.variable)}>
-      <body suppressHydrationWarning>
+      <body>
         <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
