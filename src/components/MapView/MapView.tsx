@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl';
-import type { ShopWithArtists } from '@/lib/types';
+import type { ShopWithArtists } from '@/lib/api/types';
+import { INITIAL_CENTER, INITIAL_ZOOM } from '@/lib/constants';
 import {
   selectShop,
   setBounds,
@@ -13,10 +14,6 @@ import type { MapViewProps } from './MapView.types';
 
 /** Keyless vector tiles. See https://openfreemap.org */
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
-
-/** Centred between Dallas and Austin so both metros are reachable on load. */
-const INITIAL_CENTER: [number, number] = [-97.2, 31.5];
-const INITIAL_ZOOM = 6.2;
 
 /** Pan/zoom fires continuously; only query after the user settles. */
 const DEBOUNCE_MS = 300;

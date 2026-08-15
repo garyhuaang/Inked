@@ -1,4 +1,4 @@
-import type { Bounds } from '@/lib/types';
+import type { Bounds } from '@/lib/api/types';
 
 /** Parse `swLat,swLng,neLat,neLng` from a query string; null if malformed. */
 export function parseBounds(raw: string | null): Bounds | null {

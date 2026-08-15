@@ -1,4 +1,4 @@
-import type { Bounds } from '@/lib/types';
+import type { Bounds } from '@/lib/api/types';
 
 export type UiState = {
   bounds: Bounds;

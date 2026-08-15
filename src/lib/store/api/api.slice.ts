@@ -1,4 +1,4 @@
-import type { Bounds, ShopsResponse } from '@/lib/types';
+import type { Bounds, ShopsResponse } from '@/lib/api/types';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const apiSlice = createApi({

@@ -1,4 +1,4 @@
-import type { Artist } from '@/lib/types';
+import type { Artist } from '@/lib/api/types';
 
 export type ArtistDetailsProps = {
   artist: Artist;

@@ -1,6 +1,6 @@
-import { parseBounds } from '@/lib/bounds';
+import { parseBounds } from '@/lib/api/bounds';
 import { prisma } from '@/lib/db';
-import type { ShopWithArtists, ShopsResponse } from '@/lib/types';
+import type { ShopWithArtists, ShopsResponse } from '@/lib/api/types';
 
 /**
  * GET /api/shops?bounds=swLat,swLng,neLat,neLng&style=&accepting=
