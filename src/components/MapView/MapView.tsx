@@ -52,9 +52,9 @@ export function MapView({ shops }: MapViewProps) {
     const container = containerRef.current;
     if (!container) return;
 
-    let created: MapLibreMap | null = null;
-    let debounce: ReturnType<typeof setTimeout> | undefined;
-    let observer: ResizeObserver | undefined;
+    let createdMap: MapLibreMap | null = null;
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+    let resizeObserver: ResizeObserver | undefined;
     let cancelled = false;
 
     void (async () => {
@@ -76,7 +76,7 @@ export function MapView({ shops }: MapViewProps) {
         zoom: INITIAL_ZOOM,
         attributionControl: { compact: true },
       });
-      created = map;
+      createdMap = map;
       mapRef.current = map;
 
       map.addControl(
@@ -86,10 +86,10 @@ export function MapView({ shops }: MapViewProps) {
 
       // The container can still be 0-height here (CSS not yet applied), which
       // leaves the canvas unsized and stops MapLibre requesting any tiles.
-      observer = new ResizeObserver(() => {
+      resizeObserver = new ResizeObserver(() => {
         map.resize();
       });
-      observer.observe(container);
+      resizeObserver.observe(container);
 
       // 'style.load', not 'load': 'load' waits for a first visually complete
       // render, which never arrives if the canvas started unsized.
@@ -151,17 +151,22 @@ export function MapView({ shops }: MapViewProps) {
         readyRef.current = true;
 
         const emitBounds = () => {
-          const b = map.getBounds();
+          const viewBounds = map.getBounds();
           dispatch(
-            setBounds([b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]),
+            setBounds([
+              viewBounds.getSouth(),
+              viewBounds.getWest(),
+              viewBounds.getNorth(),
+              viewBounds.getEast(),
+            ]),
           );
         };
 
         emitBounds();
 
         map.on('moveend', () => {
-          clearTimeout(debounce);
-          debounce = setTimeout(emitBounds, DEBOUNCE_MS);
+          clearTimeout(settleTimer);
+          settleTimer = setTimeout(emitBounds, DEBOUNCE_MS);
         });
 
         // A cluster zooms in rather than selecting anything.
@@ -187,10 +192,10 @@ export function MapView({ shops }: MapViewProps) {
         });
 
         map.on('click', (event) => {
-          const hits = map.queryRenderedFeatures(event.point, {
+          const clickedPins = map.queryRenderedFeatures(event.point, {
             layers: ['clusters', 'shop-pins'],
           });
-          if (hits.length === 0) dispatch(selectShop(null));
+          if (clickedPins.length === 0) dispatch(selectShop(null));
         });
 
         for (const layer of ['clusters', 'shop-pins']) {
@@ -207,9 +212,9 @@ export function MapView({ shops }: MapViewProps) {
     return () => {
       cancelled = true;
       readyRef.current = false;
-      clearTimeout(debounce);
-      observer?.disconnect();
-      created?.remove();
+      clearTimeout(settleTimer);
+      resizeObserver?.disconnect();
+      createdMap?.remove();
       mapRef.current = null;
     };
   }, [dispatch]);

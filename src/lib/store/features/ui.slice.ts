@@ -1,6 +1,7 @@
 import type { Bounds } from '@/lib/types';
-
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
+import type { UiState } from './ui.slice.types';
 
 /**
  * Approximate viewport of MapView's INITIAL_CENTER/INITIAL_ZOOM. Seeding it
@@ -10,11 +11,6 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
  * When app is ready to expand, INITIAL_BOUNDS should be based on user's current location
  */
 const INITIAL_BOUNDS: Bounds = [28.4, -101.5, 34.5, -92.9];
-
-type UiState = {
-  bounds: Bounds;
-  selectedSlug: string | null;
-};
 
 const initialState: UiState = {
   bounds: INITIAL_BOUNDS,
@@ -26,9 +22,11 @@ const uiSlice = createSlice({
   initialState,
   reducers: {
     setBounds: (state, action: PayloadAction<Bounds>) => {
-      // The map re-emits on every settle; ignore no-ops so a viewport that did
-      // not move does not invalidate the query and refetch.
-      if (state.bounds.every((value, i) => value === action.payload[i])) return;
+      // A no-op write would still notify subscribers and refetch.
+      const viewportUnchanged = state.bounds.every(
+        (coordinate, i) => coordinate === action.payload[i],
+      );
+      if (viewportUnchanged) return;
 
       state.bounds = action.payload;
     },

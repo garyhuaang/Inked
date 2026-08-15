@@ -5,16 +5,18 @@ function ArtistDetails({ artist }: ArtistDetailsProps) {
   return (
     <li className="flex items-center justify-between gap-2 text-sm">
       <span>{artist.name}</span>
-      <span className="flex flex-wrap items-center gap-1">
+      <ul className="flex flex-wrap items-center gap-1">
         {artist.styles.map((style) => (
-          <Badge key={style.slug} variant="secondary">
-            {style.name}
-          </Badge>
+          <li key={style.slug}>
+            <Badge variant="secondary">{style.name}</Badge>
+          </li>
         ))}
         {artist.acceptingClients ? (
-          <Badge variant="outline">Booking</Badge>
+          <li>
+            <Badge variant="outline">Booking</Badge>
+          </li>
         ) : null}
-      </span>
+      </ul>
     </li>
   );
 }
