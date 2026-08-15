@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Bounds } from '@/lib/types';
+import type { Bounds } from '@/lib/api/types';
 
 import { selectShop, setBounds, toggleShop, uiReducer } from './ui.slice';
 

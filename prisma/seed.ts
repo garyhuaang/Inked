@@ -13,8 +13,16 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  // Idempotent: everything is upserted on its unique slug, so re-running against
-  // a populated database updates rather than duplicating.
+  await prisma.shop.deleteMany({
+    where: { slug: { notIn: SHOPS.map((incoming) => incoming.slug) } },
+  });
+  await prisma.artist.deleteMany({
+    where: { slug: { notIn: ARTISTS.map((incoming) => incoming.slug) } },
+  });
+  await prisma.style.deleteMany({
+    where: { slug: { notIn: Object.keys(STYLE_LABELS) } },
+  });
+
   const styleIdBySlug = new Map<string, string>();
   for (const [slug, name] of Object.entries(STYLE_LABELS)) {
     const style = await prisma.style.upsert({
