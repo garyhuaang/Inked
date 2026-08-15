@@ -6,10 +6,10 @@ import { useAppSelector, useGetShopsQuery } from '@/lib/store';
 
 export function Directory() {
   const bounds = useAppSelector((state) => state.ui.bounds);
-  const { data, isFetching, isError } = useGetShopsQuery(bounds);
-  const awaitingFirstResponse = data === undefined && !isError;
+  const { data: shopsResponse, isFetching, isError } = useGetShopsQuery(bounds);
+  const awaitingFirstResponse = shopsResponse === undefined && !isError;
   const loading = isFetching || awaitingFirstResponse;
-  const shops = data?.items ?? [];
+  const shops = shopsResponse?.items ?? [];
 
   return (
     <div className="flex h-dvh flex-col">
@@ -35,7 +35,7 @@ export function Directory() {
           <ShopList
             shops={shops}
             loading={loading}
-            truncated={data?.truncated ?? false}
+            truncated={shopsResponse?.truncated ?? false}
           />
         </aside>
 

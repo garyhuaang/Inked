@@ -168,16 +168,16 @@ export function MapView({ shops }: MapViewProps) {
 
         // A cluster zooms in rather than selecting anything.
         map.on('click', 'clusters', (event) => {
-          const feature = event.features?.[0];
-          const clusterId: unknown = feature?.properties['cluster_id'];
+          const clusterFeature = event.features?.[0];
+          const clusterId: unknown = clusterFeature?.properties['cluster_id'];
           if (typeof clusterId !== 'number') return;
 
           void map
             .getSource<GeoJSONSource>('shops')
             ?.getClusterExpansionZoom(clusterId)
             .then((zoom) => {
-              if (feature?.geometry.type !== 'Point') return;
-              const [lng, lat] = feature.geometry.coordinates;
+              if (clusterFeature?.geometry.type !== 'Point') return;
+              const [lng, lat] = clusterFeature.geometry.coordinates;
               if (lng === undefined || lat === undefined) return;
               map.easeTo({ center: [lng, lat], zoom });
             });
@@ -195,11 +195,11 @@ export function MapView({ shops }: MapViewProps) {
           if (clickedPins.length === 0) dispatch(selectShop(null));
         });
 
-        for (const layer of ['clusters', 'shop-pins']) {
-          map.on('mouseenter', layer, () => {
+        for (const layerId of ['clusters', 'shop-pins']) {
+          map.on('mouseenter', layerId, () => {
             map.getCanvas().style.cursor = 'pointer';
           });
-          map.on('mouseleave', layer, () => {
+          map.on('mouseleave', layerId, () => {
             map.getCanvas().style.cursor = '';
           });
         }
