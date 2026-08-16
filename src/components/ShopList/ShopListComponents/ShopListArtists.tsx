@@ -1,7 +1,7 @@
 import { Badge } from '@/components/common/shadcnui/badge';
-import type { ArtistDetailsProps } from './ArtistDetails.types';
+import type { ShopListArtistsProps } from '../ShopList.types';
 
-function ArtistDetails({ artist }: ArtistDetailsProps) {
+export function ShopListArtists({ artist }: ShopListArtistsProps) {
   return (
     <li className="flex items-center justify-between gap-2 text-sm">
       <span>{artist.name}</span>
@@ -20,5 +20,3 @@ function ArtistDetails({ artist }: ArtistDetailsProps) {
     </li>
   );
 }
-
-export default ArtistDetails;

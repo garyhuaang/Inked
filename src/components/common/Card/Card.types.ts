@@ -7,6 +7,8 @@ export type CardProps = {
   title?: ReactNode;
   description?: ReactNode;
   content?: ReactNode;
+  contentList?: ReactNode[];
+  emptyContent?: ReactNode;
   footer?: ReactNode;
   action?: ReactNode;
   onAction?: () => void;

@@ -17,6 +17,8 @@ export function Card({
   title,
   description,
   content,
+  contentList,
+  emptyContent,
   footer,
   action,
   onAction,
@@ -24,11 +26,22 @@ export function Card({
 }: CardProps) {
   const hasHeaderBlock = Boolean(header || title || description || action);
 
+  const resolvedContent =
+    content ??
+    (contentList ? (
+      contentList.length > 0 ? (
+        <ul className="space-y-1.5">{contentList}</ul>
+      ) : (
+        emptyContent
+      )
+    ) : null);
+
   return (
     // `relative` anchors the toggle button's stretched hit area; selection
     // visuals ride the same prop as aria-pressed so they cannot disagree.
     <ShadcnCard
       className={cn(
+        'gap-3 py-4',
         onToggle && 'relative transition-colors',
         onToggle &&
           (selected ? 'border-primary bg-accent' : 'hover:bg-accent/50'),
@@ -72,7 +85,9 @@ export function Card({
           ) : null}
         </CardHeader>
       ) : null}
-      {content ? <CardContent className="px-4">{content}</CardContent> : null}
+      {resolvedContent ? (
+        <CardContent className="px-4">{resolvedContent}</CardContent>
+      ) : null}
       {footer ? <CardFooter className="px-4">{footer}</CardFooter> : null}
     </ShadcnCard>
   );
