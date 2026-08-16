@@ -3,6 +3,7 @@
 import { MapView } from '@/components/MapView';
 import { ShopList } from '@/components/ShopList';
 import { useAppSelector, useGetShopsQuery } from '@/lib/store';
+import { DirectoryHeader } from './DirectoryComponents';
 
 export function Directory() {
   const bounds = useAppSelector((state) => state.ui.bounds);
@@ -13,19 +14,7 @@ export function Directory() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Inked</h1>
-          <p className="text-xs text-muted-foreground">
-            Tattoo artists across the DFW and Austin metros
-          </p>
-        </div>
-        {isError ? (
-          <p role="alert" className="text-xs text-destructive">
-            Could not load this area.
-          </p>
-        ) : null}
-      </header>
+      <DirectoryHeader isError={isError} />
 
       <div className="flex min-h-0 flex-1 flex-col-reverse md:flex-row">
         <aside
