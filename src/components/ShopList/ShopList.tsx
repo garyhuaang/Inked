@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardContent, CardHeader } from '@/components/common/card';
-import { Skeleton } from '@/components/common/skeleton';
+import { Card } from '@/components/common/Card';
+import { Skeleton } from '@/components/common/shadcnui/skeleton';
 import { toggleShop, useAppDispatch, useAppSelector } from '@/lib/store';
 import ArtistDetails from './ArtistDetails/ArtistDetails';
 import type { ShopListProps } from './ShopList.types';
@@ -16,16 +16,9 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
   );
 
   return (
-    <section
-      aria-labelledby="shop-list-heading"
-      className="flex h-full flex-col"
-    >
+    <section id="shop-list" className="flex h-full flex-col">
       <header className="border-b px-4 py-3">
-        <h2
-          id="shop-list-heading"
-          aria-live="polite"
-          className="text-sm font-medium"
-        >
+        <h2 id="shop-list-heading" className="text-sm font-medium">
           {loading
             ? 'Searching this area…'
             : `${String(artistCount)} artists at ${String(shops.length)} shops`}
@@ -49,45 +42,28 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
             No shops in view. Pan or zoom out.
           </p>
         ) : (
-          <ul className="space-y-3">
+          <ul id="shop-list-cards" className="flex flex-col gap-4">
             {shops.map((shop) => (
               <li key={shop.id}>
                 <Card
-                  className={`relative gap-3 py-4 transition-colors ${
-                    shop.slug === selectedSlug
-                      ? 'border-primary bg-accent'
-                      : 'hover:bg-accent/50'
-                  }`}
-                >
-                  <CardHeader className="px-4">
-                    <h3 className="text-base leading-snug font-medium">
-                      <button
-                        type="button"
-                        onClick={() => dispatch(toggleShop(shop.slug))}
-                        aria-pressed={shop.slug === selectedSlug}
-                        className="cursor-pointer text-left after:absolute after:inset-0"
-                      >
-                        {shop.name}
-                      </button>
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {shop.address}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="px-4">
-                    {shop.artists.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">
-                        No artists listed yet.
-                      </p>
+                  className="gap-3 py-4"
+                  header={shop.name}
+                  selected={shop.slug === selectedSlug}
+                  onToggle={() => dispatch(toggleShop(shop.slug))}
+                  description={shop.address}
+                  content={
+                    shop.artists.length === 0 ? (
+                      'No artists listed'
                     ) : (
                       <ul className="space-y-1.5">
                         {shop.artists.map((artist) => (
                           <ArtistDetails key={artist.id} artist={artist} />
                         ))}
                       </ul>
-                    )}
-                  </CardContent>
-                </Card>
+                    )
+                  }
+                  footer={shop.instagram}
+                />
               </li>
             ))}
           </ul>

@@ -1,4 +1,4 @@
-import { Badge } from '@/components/common/badge';
+import { Badge } from '@/components/common/shadcnui/badge';
 import type { ArtistDetailsProps } from './ArtistDetails.types';
 
 function ArtistDetails({ artist }: ArtistDetailsProps) {
