@@ -2,7 +2,7 @@
 
 export type Metro = 'dfw' | 'austin';
 
-export interface Shop {
+export type Shop = {
   id: string;
   name: string;
   slug: string;
@@ -13,21 +13,21 @@ export interface Shop {
   lng: number;
   website: string | null;
   instagram: string | null;
-}
+};
 
-export interface Style {
+export type Style = {
   slug: string;
   name: string;
-}
+};
 
-export interface Artist {
+export type Artist = {
   id: string;
   name: string;
   slug: string;
   instagram: string | null;
   styles: Style[];
   acceptingClients: boolean;
-}
+};
 
 export interface ShopWithArtists extends Shop {
   artists: Artist[];
@@ -36,7 +36,12 @@ export interface ShopWithArtists extends Shop {
 /** swLat, swLng, neLat, neLng — the order used by the ?bounds= query param. */
 export type Bounds = [number, number, number, number];
 
-export interface ShopsResponse {
+export type ShopsResponse = {
   items: ShopWithArtists[];
   truncated: boolean;
-}
+};
+
+export type ArtistResponse = {
+  items: Artist[];
+  truncated: boolean;
+};

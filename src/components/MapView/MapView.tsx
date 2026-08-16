@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl';
 import type { ShopWithArtists } from '@/lib/api/types';
 import { INITIAL_CENTER, INITIAL_ZOOM } from '@/lib/constants';
+import { MAP_STYLE_URL, MAPLIBRE_WORKER_URL } from '@/lib/urls';
 import {
   selectShop,
   setBounds,
@@ -12,11 +13,8 @@ import {
 } from '@/lib/store';
 import type { MapViewProps } from './MapView.types';
 
-/** Keyless vector tiles. See https://openfreemap.org */
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
-
-/** Pan/zoom fires continuously; only query after the user settles. */
 const DEBOUNCE_MS = 300;
+const SELECTED_SHOP_ZOOM = 13;
 
 const PIN = '#18181b';
 const PIN_SELECTED = '#7c3aed';
@@ -60,15 +58,12 @@ export function MapView({ shops }: MapViewProps) {
       const maplibregl = await import('maplibre-gl');
       if (cancelled) return;
 
-      // MapLibre's default worker URL comes from `import.meta.url`, which
-      // Turbopack rewrites to a non-http value; the fallback then spawns the
-      // page itself as the worker, and no tiles ever load. Point it at the
-      // copy that scripts/copy-maplibre-worker.mjs keeps in public/.
-      maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
+      // Needed for Turbopack to reference maplibre assets since its compromised during build time
+      maplibregl.setWorkerUrl(MAPLIBRE_WORKER_URL);
 
       const map = new maplibregl.Map({
         container,
-        style: STYLE_URL,
+        style: MAP_STYLE_URL,
         center: INITIAL_CENTER,
         zoom: INITIAL_ZOOM,
         attributionControl: { compact: true },
@@ -236,6 +231,16 @@ export function MapView({ shops }: MapViewProps) {
       PIN_SELECTED,
       PIN,
     ]);
+
+    const selectedShop = shopsRef.current.find(
+      (shop) => shop.slug === selectedSlug,
+    );
+    if (!selectedShop) return;
+
+    map.easeTo({
+      center: [selectedShop.lng, selectedShop.lat],
+      zoom: Math.max(map.getZoom(), SELECTED_SHOP_ZOOM),
+    });
   }, [selectedSlug]);
 
   return <div ref={containerRef} className="h-full w-full" />;

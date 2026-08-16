@@ -1,10 +1,13 @@
 'use client';
 
-import { Card, CardContent, CardHeader } from '@/components/common/card';
-import { Skeleton } from '@/components/common/skeleton';
+import { Card } from '@/components/common/Card';
 import { toggleShop, useAppDispatch, useAppSelector } from '@/lib/store';
-import ArtistDetails from './ArtistDetails/ArtistDetails';
 import type { ShopListProps } from './ShopList.types';
+import {
+  ShopListArtists,
+  ShopListEmptyState,
+  ShopListHeader,
+} from './ShopListComponents';
 
 export function ShopList({ shops, loading, truncated }: ShopListProps) {
   const dispatch = useAppDispatch();
@@ -16,78 +19,32 @@ export function ShopList({ shops, loading, truncated }: ShopListProps) {
   );
 
   return (
-    <section
-      aria-labelledby="shop-list-heading"
-      className="flex h-full flex-col"
-    >
-      <header className="border-b px-4 py-3">
-        <h2
-          id="shop-list-heading"
-          aria-live="polite"
-          className="text-sm font-medium"
-        >
-          {loading
-            ? 'Searching this area…'
-            : `${String(artistCount)} artists at ${String(shops.length)} shops`}
-        </h2>
-        <p className="text-xs text-muted-foreground">
-          {truncated
-            ? 'Too many results — zoom in to see them all.'
-            : 'Showing what is inside the map view.'}
-        </p>
-      </header>
+    <section id="shop-list" className="flex h-full flex-col">
+      <ShopListHeader
+        loading={loading}
+        truncated={truncated}
+        artistCount={artistCount}
+        shopCount={shops.length}
+      />
 
       <div className="flex-1 overflow-y-auto p-3">
-        {loading && shops.length === 0 ? (
-          <div aria-hidden="true" className="space-y-3">
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-          </div>
-        ) : shops.length === 0 ? (
-          <p className="px-1 py-8 text-center text-sm text-muted-foreground">
-            No shops in view. Pan or zoom out.
-          </p>
+        {shops.length === 0 ? (
+          <ShopListEmptyState loading={loading} />
         ) : (
-          <ul className="space-y-3">
+          <ul id="shop-list-cards" className="flex flex-col gap-4">
             {shops.map((shop) => (
               <li key={shop.id}>
                 <Card
-                  className={`relative gap-3 py-4 transition-colors ${
-                    shop.slug === selectedSlug
-                      ? 'border-primary bg-accent'
-                      : 'hover:bg-accent/50'
-                  }`}
-                >
-                  <CardHeader className="px-4">
-                    <h3 className="text-base leading-snug font-medium">
-                      <button
-                        type="button"
-                        onClick={() => dispatch(toggleShop(shop.slug))}
-                        aria-pressed={shop.slug === selectedSlug}
-                        className="cursor-pointer text-left after:absolute after:inset-0"
-                      >
-                        {shop.name}
-                      </button>
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {shop.address}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="px-4">
-                    {shop.artists.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">
-                        No artists listed yet.
-                      </p>
-                    ) : (
-                      <ul className="space-y-1.5">
-                        {shop.artists.map((artist) => (
-                          <ArtistDetails key={artist.id} artist={artist} />
-                        ))}
-                      </ul>
-                    )}
-                  </CardContent>
-                </Card>
+                  header={shop.name}
+                  selected={shop.slug === selectedSlug}
+                  onToggle={() => dispatch(toggleShop(shop.slug))}
+                  description={shop.address}
+                  contentList={shop.artists.map((artist) => (
+                    <ShopListArtists key={artist.id} artist={artist} />
+                  ))}
+                  emptyContent="No artists listed"
+                  footer={shop.instagram}
+                />
               </li>
             ))}
           </ul>

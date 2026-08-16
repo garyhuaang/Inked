@@ -7,9 +7,9 @@ const MAX_LIMIT = 500;
 
 export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
-
   const rawBounds = searchParams.get('bounds');
   const bounds = parseBounds(rawBounds);
+
   if (rawBounds !== null && bounds === null) {
     return Response.json(
       { error: 'bounds must be swLat,swLng,neLat,neLng' },
@@ -18,8 +18,9 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const rawLimit = Number(searchParams.get('limit') ?? DEFAULT_LIMIT);
+  const derivedLimit = Math.max(Math.trunc(rawLimit), 1);
   const limit = Number.isFinite(rawLimit)
-    ? Math.min(Math.max(Math.trunc(rawLimit), 1), MAX_LIMIT)
+    ? Math.min(derivedLimit, MAX_LIMIT)
     : DEFAULT_LIMIT;
 
   const style = searchParams.get('style');
