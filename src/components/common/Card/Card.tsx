@@ -51,6 +51,7 @@ export function Card({
       {hasHeaderBlock ? (
         <CardHeader className="px-4">
           {title ? <CardTitle>{title}</CardTitle> : null}
+
           {header && onToggle ? (
             <h3 className="text-base leading-snug font-medium">
               <button
@@ -65,9 +66,11 @@ export function Card({
           ) : (
             header
           )}
+
           {description ? (
             <CardDescription>{description}</CardDescription>
           ) : null}
+
           {action ? (
             <CardAction>
               {onAction ? (
@@ -85,9 +88,11 @@ export function Card({
           ) : null}
         </CardHeader>
       ) : null}
+
       {resolvedContent ? (
         <CardContent className="px-4">{resolvedContent}</CardContent>
       ) : null}
+
       {footer ? <CardFooter className="px-4">{footer}</CardFooter> : null}
     </ShadcnCard>
   );
