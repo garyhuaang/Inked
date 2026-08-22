@@ -2,11 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl';
-import {
-  INITIAL_CENTER,
-  INITIAL_VIEW_BOUNDS,
-  INITIAL_ZOOM,
-} from '@/lib/constants';
+import { INITIAL_VIEW_BOUNDS } from '@/lib/constants';
 import { MAP_STYLE_URL, MAPLIBRE_WORKER_URL } from '@/lib/urls';
 import {
   selectShop,
@@ -26,7 +22,7 @@ import { toGeoJSON } from './MapViewUtils/mapSource';
 import { registerMapInteractions } from './MapViewUtils/mapInteractions';
 import { MapResetButton } from './MapViewComponents/MapResetButton';
 
-const SELECTED_SHOP_ZOOM = 13;
+const SELECTED_SHOP_ZOOM = 14;
 
 export function MapView({ shops }: MapViewProps) {
   const dispatch = useAppDispatch();
