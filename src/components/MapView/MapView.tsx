@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl';
-import { INITIAL_CENTER, INITIAL_ZOOM } from '@/lib/constants';
+import { INITIAL_VIEW_BOUNDS } from '@/lib/constants';
 import { MAP_STYLE_URL, MAPLIBRE_WORKER_URL } from '@/lib/urls';
 import {
   selectShop,
@@ -17,11 +17,12 @@ import {
   PIN_SELECTED,
   shopClusters,
   shopPins,
-} from './utils/mapLayers';
-import { toGeoJSON } from './utils/mapSource';
-import { registerMapInteractions } from './utils/mapInteractions';
+} from './MapViewUtils/mapLayers';
+import { toGeoJSON } from './MapViewUtils/mapSource';
+import { registerMapInteractions } from './MapViewUtils/mapInteractions';
+import { MapResetButton } from './MapViewComponents/MapResetButton';
 
-const SELECTED_SHOP_ZOOM = 13;
+const SELECTED_SHOP_ZOOM = 14;
 
 export function MapView({ shops }: MapViewProps) {
   const dispatch = useAppDispatch();
@@ -52,8 +53,8 @@ export function MapView({ shops }: MapViewProps) {
       const map = new maplibregl.Map({
         container,
         style: MAP_STYLE_URL,
-        center: INITIAL_CENTER,
-        zoom: INITIAL_ZOOM,
+        bounds: INITIAL_VIEW_BOUNDS,
+        fitBoundsOptions: { padding: 40 },
         attributionControl: { compact: true },
       });
       createdMap = map;
@@ -133,5 +134,18 @@ export function MapView({ shops }: MapViewProps) {
     });
   }, [selectedSlug]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  const resetView = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.fitBounds(INITIAL_VIEW_BOUNDS, { padding: 40 });
+    dispatch(selectShop(null));
+  };
+
+  return (
+    <div className="relative h-full w-full">
+      <MapResetButton onReset={resetView} />
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  );
 }

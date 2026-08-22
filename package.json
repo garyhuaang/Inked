@@ -14,6 +14,9 @@
   "engines": {
     "node": ">=20"
   },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2"
+  },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.9.1",
@@ -21,6 +24,7 @@
     "@reduxjs/toolkit": "^2.12.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lucide-react": "^1.33.0",
     "maplibre-gl": "^6.2.0",
     "next": "16.3.0",
     "radix-ui": "^1.6.7",
