@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import type { GeoJSONSource, MapLibreMap } from 'maplibre-gl';
-import { INITIAL_CENTER, INITIAL_ZOOM } from '@/lib/constants';
+import {
+  INITIAL_CENTER,
+  INITIAL_VIEW_BOUNDS,
+  INITIAL_ZOOM,
+} from '@/lib/constants';
 import { MAP_STYLE_URL, MAPLIBRE_WORKER_URL } from '@/lib/urls';
 import {
   selectShop,
@@ -53,8 +57,8 @@ export function MapView({ shops }: MapViewProps) {
       const map = new maplibregl.Map({
         container,
         style: MAP_STYLE_URL,
-        center: INITIAL_CENTER,
-        zoom: INITIAL_ZOOM,
+        bounds: INITIAL_VIEW_BOUNDS,
+        fitBoundsOptions: { padding: 40 },
         attributionControl: { compact: true },
       });
       createdMap = map;
@@ -138,7 +142,7 @@ export function MapView({ shops }: MapViewProps) {
     const map = mapRef.current;
     if (!map) return;
 
-    map.easeTo({ center: INITIAL_CENTER, zoom: INITIAL_ZOOM });
+    map.fitBounds(INITIAL_VIEW_BOUNDS, { padding: 40 });
     dispatch(selectShop(null));
   };
 
