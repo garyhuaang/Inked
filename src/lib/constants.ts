@@ -2,7 +2,7 @@ import type { Bounds } from '@/lib/api/types';
 
 /** Centred between Dallas and Austin so both metros are reachable on load. */
 export const INITIAL_CENTER: [number, number] = [-97.2, 31.5];
-export const INITIAL_ZOOM = 6.2;
+export const INITIAL_ZOOM = 7.2;
 
 /**
  * Approximate viewport of INITIAL_CENTER at INITIAL_ZOOM. Seeding the store

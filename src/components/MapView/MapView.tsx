@@ -17,9 +17,10 @@ import {
   PIN_SELECTED,
   shopClusters,
   shopPins,
-} from './utils/mapLayers';
-import { toGeoJSON } from './utils/mapSource';
-import { registerMapInteractions } from './utils/mapInteractions';
+} from './MapViewUtils/mapLayers';
+import { toGeoJSON } from './MapViewUtils/mapSource';
+import { registerMapInteractions } from './MapViewUtils/mapInteractions';
+import { MapResetButton } from './MapViewComponents/MapResetButton';
 
 const SELECTED_SHOP_ZOOM = 13;
 
@@ -133,5 +134,18 @@ export function MapView({ shops }: MapViewProps) {
     });
   }, [selectedSlug]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  const resetView = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.easeTo({ center: INITIAL_CENTER, zoom: INITIAL_ZOOM });
+    dispatch(selectShop(null));
+  };
+
+  return (
+    <div className="relative h-full w-full">
+      <MapResetButton onReset={resetView} />
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  );
 }
